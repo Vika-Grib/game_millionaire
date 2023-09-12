@@ -9,7 +9,8 @@ bcolors = {'RED': '\033[31m', 'GREEN': '\033[32m', 'YELLOW': '\033[33m',
 
 
 def printRed(str, end='\n'):
-    print(f"{bcolors['RED']}{str}{bcolors['ENDC']}", end=end)
+    print(f"{bcolors['RED']}{str}{bcolors['ENDC']}", end=end) # {bcolors - ПЕРЕМЕННАЯ, ['RED'] - КЛЮЧ, str - строка, кот выводим пользователю на экран,
+    # и везде в конце добавляем bcolors['ENDC'] и end=end если нужно на новую строку или в этой же строке
 
 
 def printGreen(str, end='\n'):

@@ -14,20 +14,21 @@ class Game:
     """
     _levels = [100, 200, 300, 500, 1000,
                2000, 4000, 8000, 16000, 32000,
-               64000, 125000, 250000, 500000, 1000000]
-    _levelsNum = len(_levels)
+               64000, 125000, 250000, 500000, 1000000]  # список сумм, кот игрок получает при ответе на очередной вопрос
+    _levelsNum = len(_levels)  # количество уровней - можем добавлять уровни в _levels и они будут учитываться в будущем
     _guaranteedSums = [_levels[4], _levels[9], _levels[14]]
 
     def __init__(self, userName):
-        self._questions = Questions().getQuestions()
-        self._userName = userName
-        self._curLevel = -1     # until first question
+        self._questions = Questions().getQuestions()  # сразу мы получаем список вопросов для игры - обращаемся к классу Questions и методу getQuestions, кот возвращает нам рандомный список вопросов
+        self._userName = userName   #храним имя пользователя
+        self._curLevel = -1     # until first question - текущий уровень на котором мы сейчас находимся. т.е. как только мы создаем этот класс - мы еще не перешли к 1-му уровню, поэтому изначально он у нас -1
         self._curPrize = 0      # the last guaranteed sum or the last won sum (if get prize chosen)
-        self._hints = [hints.FiftyFifty(), hints.PhoneFriend(), hints.AskAudience()]
+        self._hints = [hints.FiftyFifty(), hints.PhoneFriend(), hints.AskAudience()]  # имеющиеся подсказки -- сразу создаем объекты соответствующих классов
 
+    # у всех уровень доступа _protected
     def _getCurQuestion(self):
         """
-        Get current question's object
+        Get current question's object -  вопрос текущего уровня
         :return: current question's object
         """
         return self._questions[self._curLevel]
@@ -45,17 +46,21 @@ class Game:
 
     def _toCurLevel(self, showQuestion=True):
         """
-        Go back to the current level
+        Go back to the current level - если нужно перейти именно к текущему уровню.
+        Нужно когда - захотели взять подсказку, взяли - перешли на другой экран с подсказками и после того как мы ее
+        использовали - мы хотим вернуться к текущемуу уровню или же мы не импользовали подсказку и нажали клавишу back
+        и мы снова хотим вернуться к текущему уровню посмотеть на табл сс суммами, снова посмотреть на вопрос, варинаты
+        ответов и тд
         :param showQuestion: show question if True
         :return: None
         """
         self._toLevel(isNextQuestion=False, showQuestion=showQuestion)
 
-    def _toLevel(self, isNextQuestion=True, showQuestion=True):
+    def _toLevel(self, isNextQuestion=True, showQuestion=True): # отпраляем 2 опциональных параметра
         """
-        Print question and wait for user's choice
-        :param isNextQuestion: next question (True) or current question (False)
-        :param showQuestion: show question (True) or don't show question (False)
+        Print question and wait for user's choice - более общая функция,, к которой обращаются предыдущие 2 функкции
+        :param isNextQuestion: next question (True) - если переходим на след уровень or current question (False) - если остаемся на текущем
+        :param showQuestion: show question (True) or don't show question (False) - хотим ли распечатать снова вопрос
         :return: None
         """
         if isNextQuestion:    # print levels tree
@@ -71,7 +76,7 @@ class Game:
 
     def _printLevels(self):
         """
-        Print levels' tree with the current position and next level's arrow
+        Print levels' tree with the current position and next level's arrow - печатает всё дерево с вопросами и стоимостью за ответы
         :return: None
         """
         for i, l in enumerate(Game._levels):
@@ -108,7 +113,8 @@ class Game:
 
     def _getUserChoice(self, chooseHint=False):
         """
-        Get user's choice
+        Get user's choice -  после каждого вопроса получить выбор пользователя - хочет ли подсказку,ответить на вопрос
+        или завершить игру
         :param chooseHint: choose hint (True) or choose answers' option (False)
         :return:
         """
@@ -123,18 +129,22 @@ class Game:
 
     def _printAnswerChoices(self):
         """
-        Print input options after a question is asked
+        Print input options after a question is asked - позволяет распечатать варианты ответа для текущего вопроса
+        этот метод подготавливает и печатает доступные для пользователя параметры ввода на основе текущего вопроса
+        и наличия подсказок. Варианты включают ответ на вопрос, использование подсказки и выход из игры
         :return: correct input options
         """
         correctInput = []
 
-        answs = self._getCurQuestion().getCurAnswers()
+        answs = self._getCurQuestion().getCurAnswers()  # Эта строка извлекает текущие варианты ответа (варианты) для текущего вопроса с использованием метода _getCurQuestion.
+        # Затем он вызывает getCurAnswersметод текущего вопроса, чтобы получить список текущих вариантов ответа: выбрать подсказку или завершить игру
 
-        for i, a in enumerate(answs):
+        for i, a in enumerate(answs):  # Функция enumerate() возвращает объект, который генерирует кортежи, состоящие из двух элементов - индекса элемента и самого элемента.
             if a != '':
                 correctInput.append(str(i+1))
 
-        printNegative(f"({'/'.join(correctInput)} - for answer, ", end='')
+        printNegative(f"({'/'.join(correctInput)} - for answer, ", end='')  # Он печатает варианты ответа, объединяя элементы списка correctInputкосой чертой ( /), а затем добавляет «- для ответа», чтобы указать, что эти варианты предназначены для ответа на вопроc
+
 
         if len(self._getNotUsedHints()) > 0:
             correctInput.extend(['h', 'H'])
@@ -148,13 +158,14 @@ class Game:
     def _printHintChoices(self):
         """
         Print input options after 'get hint' is chosen
+        Если игрок выбирает подсказку, то ему нужно распечатать какие подсказки у него остались
         :return: correct input options
         """
         notUsedHints = self._getNotUsedHints()
         printBlue(f"\n{self._userName}, you have {len(notUsedHints)} hint(s): ")
 
         for i, hint in enumerate(notUsedHints):
-            printBold(f"{i + 1}: {hint.getName():20}", end='')
+            printBold(f"{i + 1}: {hint.getName():20}", end='')  # без переноса - в одной строке
         printBold(f"b: Back")
 
         correctInput = [str(i) for i in range (1, len(notUsedHints)+1)]
@@ -233,22 +244,27 @@ class Game:
         else:
             printBlue(f"{self._userName}, unfortunately you prize is $0.")
 
+
+    # 3 внешних public метода
     @staticmethod
     def waitForEnter():
         """
         Waiting for Enter
         :return: None
         """
-        coloredInput("\nPress 'Enter' to continue...")
+        coloredInput("\nPress 'Enter' to continue...")   # используем наш модуль colors -т.к. часто требуется задавать
+                                                         # вопрос и просить нажать enter для продолжения
+                                                         # - поэтому в виде отдельного метода
 
     @staticmethod
-    def clearScr():
+    def clearScr(): # каждый раз после того как мы ответили на очередной вопрос - я очищаю экран и перехожу к след вопросу,
+        # чтобы вывод не засорял экран и визуально было красиво
         if os.name == 'posix':
             os.system('clear')
         else:
             os.system('cls')
 
-    def start(self):
+    def start(self):  # позволяет непосредственно запустить игру
         """
         Start the game
         :return: None
